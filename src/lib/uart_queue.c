@@ -50,6 +50,8 @@ ssize_t write_uart_queue(void *uart_queue, void* buffer, size_t size) {
     return i;
 }
 
+
+// FIXME: This uses up way too much processor time. Redo this using the uDMA controller
 void empty_rx_buffer(struct UART_Queue *queue) {
 
     BaseType_t higher_priority_task_woken = pdFALSE;
@@ -73,6 +75,7 @@ void empty_rx_buffer(struct UART_Queue *queue) {
     ROM_IntEnable(queue->hardware_interrupt_address);
 }
 
+// FIXME: This uses up way too much processor time. Redo this using the uDMA controller
 void fill_tx_buffer(struct UART_Queue *queue) {
 
     BaseType_t higher_priority_task_woken = pdFALSE;
