@@ -1,9 +1,78 @@
-/* Ross Baehr
-   R@M 2017
+/* Ross Baehr, Nathaniel Renegar
+   R@M 2020
    ross.baehr@gmail.com
+   naterenegar@gmail.com
 */
 
 #include "include/configure.h"
+#include <inc/tm4c123gh6pm.h>
+#include <driverlib/pwm.h>
+
+// Need to configure pins PD0, PD1, PE4, PE5, PF0, PF1, PF2, and PF3 for PWM operation
+// NOTE: This goes through the steps on page 1239 of the TM4C123G Datasheet
+void configurePWM(void) {
+
+  // Enable GPIO blocks D, E, and F
+  ROM_SysCtlPeripheralEnable(SYSCTL_PERIPH_GPIOD);
+  while(!ROM_SysCtlPeripheralReady(SYSCTL_PERIPH_GPIOD))
+  {
+  }
+  ROM_SysCtlPeripheralEnable(SYSCTL_PERIPH_GPIOE);
+  while(!ROM_SysCtlPeripheralReady(SYSCTL_PERIPH_GPIOE))
+  {
+  }
+
+  ROM_SysCtlPeripheralEnable(SYSCTL_PERIPH_GPIOF);
+  while(!ROM_SysCtlPeripheralReady(SYSCTL_PERIPH_GPIOF))
+  {
+  }
+
+  // Enable PWM Module 1
+  ROM_SysCtlPeripheralEnable(SYSCTL_PERIPH_PWM1);
+  while(!ROM_SysCtlPeripheralReady(SYSCTL_PERIPH_PWM1))
+  {
+  }
+
+  ROM_SysCtlPWMClockSet(SYSCTL_PWMDIV_8);
+
+
+  // Write to GPIOLOCK register to unlock GPIOCR for port F (see page 684 of TM4C123G datasheet)
+  GPIO_PORTF_LOCK_R = GPIO_LOCK_KEY;
+  GPIO_PORTF_CR_R |= 0x00000001;
+
+  // Set the alternate function of each pin to be PWM
+  ROM_GPIOPinConfigure(GPIO_PD0_M1PWM0);
+  ROM_GPIOPinConfigure(GPIO_PD1_M1PWM1);
+  ROM_GPIOPinConfigure(GPIO_PE4_M1PWM2);
+  ROM_GPIOPinConfigure(GPIO_PE5_M1PWM3);
+  ROM_GPIOPinConfigure(GPIO_PF0_M1PWM4);
+  ROM_GPIOPinConfigure(GPIO_PF1_M1PWM5);
+  ROM_GPIOPinConfigure(GPIO_PF2_M1PWM6);
+  ROM_GPIOPinConfigure(GPIO_PF3_M1PWM7);
+
+  // Configure pins to be used by PWM peripheral
+  ROM_GPIOPinTypePWM(GPIO_PORTD_BASE, GPIO_PIN_0 | GPIO_PIN_1);
+  ROM_GPIOPinTypePWM(GPIO_PORTE_BASE, GPIO_PIN_4 | GPIO_PIN_5);
+  ROM_GPIOPinTypePWM(GPIO_PORTF_BASE, GPIO_PIN_0 | GPIO_PIN_1 |
+                     GPIO_PIN_2 | GPIO_PIN_3);
+
+
+  // Configure PWM Generators 0-3 for countdown mode with immediate updates
+
+  ROM_PWMGenConfigure(PWM1_BASE, PWM_GEN_0, PWM_GEN_MODE_DOWN | PWM_GEN_MODE_NO_SYNC);
+  ROM_PWMGenConfigure(PWM1_BASE, PWM_GEN_1, PWM_GEN_MODE_DOWN | PWM_GEN_MODE_NO_SYNC);
+  ROM_PWMGenConfigure(PWM1_BASE, PWM_GEN_2, PWM_GEN_MODE_DOWN | PWM_GEN_MODE_NO_SYNC);
+  ROM_PWMGenConfigure(PWM1_BASE, PWM_GEN_3, PWM_GEN_MODE_DOWN | PWM_GEN_MODE_NO_SYNC);
+
+  // Want PWM freq of 200 Hz, period of 5000 us
+  // 5000 us / 0.16 us = 31250 ticks
+
+  ROM_PWMGenPeriodSet(PWM1_BASE, PWM_GEN_0, 31250 - 1);
+  ROM_PWMGenPeriodSet(PWM1_BASE, PWM_GEN_1, 31250 - 1);
+  ROM_PWMGenPeriodSet(PWM1_BASE, PWM_GEN_2, 31250 - 1);
+  ROM_PWMGenPeriodSet(PWM1_BASE, PWM_GEN_3, 31250 - 1);
+
+}
 
 void configureUART(void)
 {
@@ -101,18 +170,16 @@ void configureUART(void)
 
 }
 
+// FIXME: Pin conflict between LED driver pins and PWM driver pins
 void configureGPIO(void) {
-
   ROM_SysCtlPeripheralEnable(SYSCTL_PERIPH_GPIOF);
-  while(!ROM_SysCtlPeripheralReady(SYSCTL_PERIPH_GPIOF)) {}
-
+  while(!ROM_SysCtlPeripheralReady(SYSCTL_PERIPH_GPIOF))
+  {
+  }
   //
   // Configure the GPIO port for the LED operation.
   //
   ROM_GPIOPinTypeGPIOOutput(GPIO_PORTF_BASE, GPIO_PIN_1|GPIO_PIN_2|GPIO_PIN_3);
-  #ifdef DEBUG
-  UARTprintf("GPIO configured\n");
-  #endif
 }
 
 void configureI2C(void) {
@@ -120,11 +187,8 @@ void configureI2C(void) {
   // Enable the peripherals used by this example.
   //
   ROM_SysCtlPeripheralEnable(SYSCTL_PERIPH_I2C0);
-  ROM_SysCtlPeripheralEnable(SYSCTL_PERIPH_I2C3);
 
   ROM_SysCtlPeripheralEnable(SYSCTL_PERIPH_GPIOB);
-  ROM_SysCtlPeripheralEnable(SYSCTL_PERIPH_GPIOD);
-
 
   //
   // Configure the pin muxing for I2C0 functions on port B2 and B3.
@@ -134,33 +198,21 @@ void configureI2C(void) {
   ROM_GPIOPinConfigure(GPIO_PB2_I2C0SCL);
   ROM_GPIOPinConfigure(GPIO_PB3_I2C0SDA);
 
-  ROM_GPIOPinConfigure(GPIO_PD0_I2C3SCL);
-  ROM_GPIOPinConfigure(GPIO_PD1_I2C3SDA);
-
-
   // Select the I2C function for these pins.
   ROM_GPIOPinTypeI2CSCL(GPIO_PORTB_BASE, GPIO_PIN_2);
   ROM_GPIOPinTypeI2C(GPIO_PORTB_BASE, GPIO_PIN_3);
-
-  ROM_GPIOPinTypeI2CSCL(GPIO_PORTD_BASE, GPIO_PIN_0);
-  ROM_GPIOPinTypeI2C(GPIO_PORTD_BASE, GPIO_PIN_1);
 
 
   //
   // Initialize the I2C master.
   //
   ROM_I2CMasterInitExpClk(I2C0_BASE, ROM_SysCtlClockGet(), false);
-  ROM_I2CMasterInitExpClk(I2C3_BASE, ROM_SysCtlClockGet(), false);
 
   //
   // Enable interrupts for Arbitration Lost, Stop, NAK, CLock lLow Timeout and Data
   ROM_I2CMasterIntEnableEx(I2C0_BASE, (I2C_MASTER_INT_ARB_LOST |
                                    I2C_MASTER_INT_STOP | I2C_MASTER_INT_NACK |
                                    I2C_MASTER_INT_TIMEOUT | I2C_MASTER_INT_DATA));
-  ROM_I2CMasterIntEnableEx(I2C3_BASE, (I2C_MASTER_INT_ARB_LOST |
-                                   I2C_MASTER_INT_STOP | I2C_MASTER_INT_NACK |
-                                   I2C_MASTER_INT_TIMEOUT | I2C_MASTER_INT_DATA));
-
 
   //
   // Enable the I2C interrupt.

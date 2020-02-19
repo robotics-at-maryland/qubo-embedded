@@ -1,6 +1,7 @@
-/* Ross Baehr
-   R@M 2017
+/* Ross Baehr, Nathaniel Renegar
+   R@M 2020
    ross.baehr@gmail.com
+   naterenegar@gmail.com
 */
 
 //QSCU
@@ -148,8 +149,9 @@ int main() {
 
 
   configureUART();
-  configureGPIO();
+//  configureGPIO(); // FIXME: Determine suitable PWM outputs to replace pins PF0-PF4
   configureI2C();
+  configurePWM();
 
   /* USB_serial_configure(); */
 

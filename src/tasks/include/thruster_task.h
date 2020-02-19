@@ -50,6 +50,12 @@
 // Map throttles in the range [-1 : 1] to PWM pulse lengths, then scale to PCA counter ticks
 // x = 1 corresponds to 1900 us pulse length, and x = -1 corresponds to 1100 us pulse length
 #define THRUSTER_SCALE(x) ((((x * (MAX_PULSE-MIN_PULSE) / 2 + ZERO_THROTTLE) * 1.01) + 1) / MIN_TIME_STEP)
+
+// TODO: Add extra PWM parameter defines to make this work for different TM4C123G PWM Peripheral configs
+#define TIVA_PWM_US_SCALE(x) ((x / 5000.0) * 31250)
+#define TIVA_PWM_THROTTLE_SCALE(x) (((x * ((MAX_PULSE - MIN_PULSE) / 2) + ZERO_THROTTLE) / 5000.0) * 31250)
+
+
 bool thruster_task_init();
 static void thruster_task(void *params);
 
