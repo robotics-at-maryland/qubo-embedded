@@ -28,11 +28,11 @@ CFLAG = -c
 OFLAG = -o
 INCLUDEFLAG = -I
 
-CFLAGS = -g -mthumb -mcpu=cortex-m4 -mfpu=fpv4-sp-d16 -mfloat-abi=hard
+CFLAGS = -g -mthumb -mcpu=cortex-m4 -mfpu=fpv4-sp-d16 -mfloat-abi=hard 
 CFLAGS +=-Os -ffunction-sections -fdata-sections -MD -std=c99
 CFLAGS += -pedantic -DPART_TM4C123GH6PM -c
 CFLAGS += -DTARGET_IS_TM4C123_RB2
-CFLAGS += -Dgcc
+CFLAGS += -Dgcc 
 #CFLAGS = -mcpu=cortex-m4 -march=armv7e-m -mthumb -mfloat-abi=hard -mfpu=fpv4-sp-d16 -Dgcc -DPART_TM4C123GH6PM -DTARGET_IS_TM4C123_RB1 -ffunction-sections -fdata-sections -g -gdwarf-3 -gstrict-dwarf -specs="nosys.specs" -MD -std=c99 -I$(TC_PATH)arm-none-eabi/include/
 
 LDFLAGS = -T $(LINKER_SCRIPT) --entry ResetISR --gc-sections

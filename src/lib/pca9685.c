@@ -38,11 +38,9 @@ void pca9685_reset(uint32_t device) {
 }
 
 void pca9685_setPWMFreq(uint32_t device, float freq) {
-  freq *= 0.9;  // Correct for overshoot in the frequency setting (see issue #11).
-  float prescaleval = 25000000;
-  prescaleval /= 4096;
-  prescaleval /= freq;
-  prescaleval -= 1;
+  uint32_t osc_freq = 27000000;
+  float prescaleval = ((osc_freq / (freq  * 4096.0)) + 0.5) - 1;
+  uint8_t prescale_int = (uint8_t) prescaleval;
   #ifdef DEBUG
     //Serial.print("Estimated pre-scale: "); Serial.println(prescaleval);
   #endif
@@ -51,7 +49,7 @@ void pca9685_setPWMFreq(uint32_t device, float freq) {
   #endif
 
   uint8_t mode[2] = {PCA9685_MODE1, 0x21};
-  uint8_t prescale[2] = {PCA9685_PRESCALE, floor(prescaleval + 0.5)};
+  uint8_t prescale[2] = {PCA9685_PRESCALE, prescale_int};
 
   mode[1] |= 0x10;
   writeI2C(device, _i2caddr, mode, 2);

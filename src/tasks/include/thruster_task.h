@@ -31,7 +31,7 @@
 #define PCA_ADDR 0b1011111
 
 // Frequency of the PWM on the PCA9685.  It's a float.
-#define PWM_FREQ 60.0
+#define PWM_FREQ 244.0
 
 // Maximum time, in microseconds, to set the PWM to
 #define MAX_PULSE 1900
@@ -45,11 +45,11 @@
 // PCA has a 4096-counter where each tick is 1/4096 of the PWM_FREQ. This is used as
 // reference for the phase shift of the start and stop times of your pulse.
 // The frequency of the counter is thus PWM_FREQ * 4096.
-#define MIN_TIME_DELAY ( 1E6 / (PWM_FREQ * 4096))
+#define MIN_TIME_STEP ( 1E6 / (PWM_FREQ * 4096))
+
 // Map throttles in the range [-1 : 1] to PWM pulse lengths, then scale to PCA counter ticks
 // x = 1 corresponds to 1900 us pulse length, and x = -1 corresponds to 1100 us pulse length
-#define THRUSTER_SCALE(x) ((x*(MAX_PULSE-MIN_PULSE)/2 + ZERO_THROTTLE) / MIN_TIME_DELAY)
-
+#define THRUSTER_SCALE(x) ((((x * (MAX_PULSE-MIN_PULSE) / 2 + ZERO_THROTTLE) * 1.01) + 1) / MIN_TIME_STEP)
 bool thruster_task_init();
 static void thruster_task(void *params);
 

@@ -20,28 +20,21 @@ static void thruster_task(void *params) {
   pca9685_begin(I2C0_BASE, PCA_ADDR);
   pca9685_setPWMFreq(I2C0_BASE, PWM_FREQ);
 
-  vTaskDelay(xDelay * 10);
+  // With current PCA9685, here are the offsets:
+  // 1900 - 1880 = 20 us
+  // 1500 - 1484 = 16 us
+  // 1100 - 1088 = 12 us
+  // Calculation for us offset:
+  // (1900 - 1100) / (20 - 12) = 100 = m
+  // y - 1100 = 100(x - 12)
+  // y = 100x - 100
+  // y = 100(x - 1)
+  // (desired / 100) + 1 = us offset
 
-  blink_rgb(BLUE_LED | GREEN_LED, 1);
-
-  // THRUSTER TEST
-  // We run this once, then task does nothing
-
-
-
-  // First, go through each thruster and throttle up to highest safe throttle
-  // TODO: Take note of current draw vs. thrust
-  // TODO: Figure out mapping of thrusters to pins
-  for(i = 0; i < 8; i++) { // thruster select loop
-    for(j = 1; j < 8; j++) {// thrust set loop
-      vTaskDelay(xDelay * 5);
-      blink_rgb(BLUE_LED | GREEN_LED, 1);
-      pca9685_setPWM(I2C0_BASE, i, 0, THRUSTER_SCALE(0.1*j));
-      vTaskDelay(xDelay * 10);
-      pca9685_setPWM(I2C0_BASE, i, 0, THRUSTER_SCALE(0));
-    }
+  for(uint8_t i = 0; i < 10; i++)
+  {
+    pca9685_setPWM(I2C0_BASE, i, 0, (1900 + (1900 / 100) + 1) / (1E6/(PWM_FREQ*4096)));
   }
-
 
   for (;;) {
     // wait indefinitely for something to come over the buffer
