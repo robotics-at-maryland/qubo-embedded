@@ -10,7 +10,6 @@
 #include "tasks/include/read_uart1.h"
 #include "tasks/include/example_blink.h"
 #include "tasks/include/example_uart.h"
-#include "tasks/include/i2c_test.h"
 #include "tasks/include/tiqu.h"
 #include "tasks/include/thruster_task.h"
 #include "lib/include/usb_serial.h"
