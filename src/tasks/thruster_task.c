@@ -9,6 +9,39 @@ bool thruster_task_init() {
   return false;
 }
 
+/* NOTE: The factor of 1.01 is a calibration offest determined emperically */
+
+static inline uint16_t pca_9685_throttle_scale(float throttle)
+{
+  if (throttle > 1.0)
+  {
+    throttle = 1.0;
+  }
+  else if (throttle < -1.0)
+  {
+    throttle = -1.0;
+  }
+
+
+  return (uint16_t) (((((throttle * (MAX_PULSE_WIDTH - MIN_PULSE_WIDTH) / 2) +
+                     ZERO_THROTTLE_WIDTH) * 1.01) + 1) / MIN_TIME_STEP);
+}
+
+static inline uint16_t pca_9685_pwm_scale(uint16_t pulse_width)
+{
+  if (pulse_width > MAX_PULSE_WIDTH)
+  {
+    pulse_width = MAX_PULSE_WIDTH;
+  }
+  else if (pulse_width < MIN_PULSE_WIDTH)
+  {
+    pulse_width = MIN_PULSE_WIDTH;
+  }
+
+  return (uint16_t) (((pulse_width * 1.01) + 1) / MIN_TIME_STEP);
+}
+
+
 static void thruster_task(void *params) {
   struct Thruster_Set thruster_set;
   bool init = false;
@@ -31,9 +64,16 @@ static void thruster_task(void *params) {
   // y = 100(x - 1)
   // (desired / 100) + 1 = us offset
 
+ for(uint8_t i = 0; i < 10; i++)
+  {
+    pca9685_setPWM(I2C0_BASE, i, 0, (1500 + (1500 / 100) + 1) / (1E6/(PWM_FREQ*4096)));
+  }
+
+ vTaskDelay(xDelay * 2);
+
   for(uint8_t i = 0; i < 10; i++)
   {
-    pca9685_setPWM(I2C0_BASE, i, 0, (1900 + (1900 / 100) + 1) / (1E6/(PWM_FREQ*4096)));
+    pca9685_setPWM(I2C0_BASE, i, 0, (1400 + (1400 / 100) + 1) / (1E6/(PWM_FREQ*4096)));
   }
 
   for (;;) {
