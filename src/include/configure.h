@@ -13,7 +13,7 @@
 #include <stdint.h>
 #include <inc/hw_memmap.h>
 #include <inc/hw_types.h>
-#include <inc/hw_ints.h>
+//#include <inc/hw_ints.h>
 #include <driverlib/interrupt.h>
 #include <driverlib/gpio.h>
 #include <driverlib/i2c.h>
@@ -27,5 +27,7 @@ void configureUART(void);
 void configureGPIO(void);
 
 void configureI2C(void);
+
+void configurePWM(void);
 
 #endif

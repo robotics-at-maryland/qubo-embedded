@@ -47,8 +47,16 @@
 // The frequency of the counter is thus PWM_FREQ * 4096.
 #define MIN_TIME_STEP (1E6 / (PWM_FREQ * 4096))
 
-// Map throttles in the range [-1 : 1] to PWM pulse lengths, then scale to PCA counter ticks
-// x = 1 corresponds to 1900 us pulse length, and x = -1 corresponds to 1100 us pulse length
+
+// TODO: Add extra PWM parameter defines to make this work for different TM4C123G PWM Peripheral configs
+// TODO: convert these to inline functions instead of macros
+#define TIVA_PWM_US_SCALE(x) ((x / 5000.0) * 31250)
+#define TIVA_PWM_THROTTLE_SCALE(x) (((x * ((MAX_PULSE - MIN_PULSE) / 2) + ZERO_THROTTLE) / 5000.0) * 31250)
+
+// These are determined from the clocking settings of the tiva and desired pwm frequency
+// See the file "src/configure.c"
+#define TIVA_PWM_TICKS 31250
+#define TIVA_PWM_PERIOD 5000.0
 
 bool thruster_task_init();
 static void thruster_task(void *params);
@@ -62,6 +70,17 @@ static inline uint16_t pca_9685_throttle_scale(float throttle);
  *  range [0, 4096] corresponding to the relative on time of a
  *  PWM pulse */
 static inline uint16_t pca_9685_pwm_scale(uint16_t pulse_width);
+
+/** Converts a float in the range [-1, 1] to a uint32_t in the
+ *  range [0, TIVA_PWM_TICKS] corresponding to the relative on time of a
+ *  PWM pulse */
+static inline uint32_t tiva_throttle_scale(float throttle);
+
+/** Converts a uint32_t in the range [1100, 1900] to a uint16_t in the
+ *  range [0, TIVA_PWM_TICKS] corresponding to the relative on time of a
+ *  PWM pulse */
+static inline uint32_t tiva_pwm_scale(uint32_t pulse_width);
+
 
 
 #endif
