@@ -47,12 +47,6 @@
 // The frequency of the counter is thus PWM_FREQ * 4096.
 #define MIN_TIME_STEP (1E6 / (PWM_FREQ * 4096))
 
-
-// TODO: Add extra PWM parameter defines to make this work for different TM4C123G PWM Peripheral configs
-// TODO: convert these to inline functions instead of macros
-#define TIVA_PWM_US_SCALE(x) ((x / 5000.0) * 31250)
-#define TIVA_PWM_THROTTLE_SCALE(x) (((x * ((MAX_PULSE - MIN_PULSE) / 2) + ZERO_THROTTLE) / 5000.0) * 31250)
-
 // These are determined from the clocking settings of the tiva and desired pwm frequency
 // See the file "src/configure.c"
 #define TIVA_PWM_TICKS 31250

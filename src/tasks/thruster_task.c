@@ -70,7 +70,7 @@ static inline uint32_t tiva_pwm_scale(uint32_t pulse_width)
     pulse_width = MIN_PULSE_WIDTH;
   }
 
-  return (uint32_t) ((pulse_width / TIVA_PWM_PERIOD) * TIVA_PWM_TICKS)
+  return (uint32_t) ((pulse_width / TIVA_PWM_PERIOD) * TIVA_PWM_TICKS);
 }
 
 static void thruster_task(void *params) {
@@ -83,14 +83,14 @@ static void thruster_task(void *params) {
   // PWM is configured to have period of 5000 us (freq 200 Hz) divided into 31250 ticks
   // (1500 / 5000) * 31250 = 9375
   
-  ROM_PWMPulseWidthSet(PWM1_BASE, PWM_OUT_0, TIVA_PWM_THROTTLE_SCALE(0));
-  ROM_PWMPulseWidthSet(PWM1_BASE, PWM_OUT_1, TIVA_PWM_THROTTLE_SCALE(1));
-  ROM_PWMPulseWidthSet(PWM1_BASE, PWM_OUT_2, TIVA_PWM_THROTTLE_SCALE(0.8));
-  ROM_PWMPulseWidthSet(PWM1_BASE, PWM_OUT_3, TIVA_PWM_THROTTLE_SCALE(0.6));
-  ROM_PWMPulseWidthSet(PWM1_BASE, PWM_OUT_4, TIVA_PWM_THROTTLE_SCALE(-0.2));
-  ROM_PWMPulseWidthSet(PWM1_BASE, PWM_OUT_5, TIVA_PWM_THROTTLE_SCALE(-0.4));
-  ROM_PWMPulseWidthSet(PWM1_BASE, PWM_OUT_6, TIVA_PWM_THROTTLE_SCALE(-0.6));
-  ROM_PWMPulseWidthSet(PWM1_BASE, PWM_OUT_7, TIVA_PWM_THROTTLE_SCALE(-0.8));
+  ROM_PWMPulseWidthSet(PWM1_BASE, PWM_OUT_0, tiva_throttle_scale(0));
+  ROM_PWMPulseWidthSet(PWM1_BASE, PWM_OUT_1, tiva_throttle_scale(1));
+  ROM_PWMPulseWidthSet(PWM1_BASE, PWM_OUT_2, tiva_throttle_scale(0.8));
+  ROM_PWMPulseWidthSet(PWM1_BASE, PWM_OUT_3, tiva_throttle_scale(0.6));
+  ROM_PWMPulseWidthSet(PWM1_BASE, PWM_OUT_4, tiva_throttle_scale(-0.2));
+  ROM_PWMPulseWidthSet(PWM1_BASE, PWM_OUT_5, tiva_throttle_scale(-0.4));
+  ROM_PWMPulseWidthSet(PWM1_BASE, PWM_OUT_6, tiva_throttle_scale(-0.6));
+  ROM_PWMPulseWidthSet(PWM1_BASE, PWM_OUT_7, tiva_throttle_scale(-0.8));
 
   // With PWM period, ticks, and pulse width set, we're ready to enable the generators
   ROM_PWMGenEnable(PWM1_BASE, PWM_GEN_0);
