@@ -20,7 +20,7 @@ CXX = $(TOOLCHAIN)g++
 AS = $(TOOLCHAIN)as
 LD = $(TOOLCHAIN)ld
 OBJCOPY = $(TOOLCHAIN)objcopy
-AR = $(TOOLCHAIN)ar
+AR = $(TOOLCHAIN)gcc-ar
 
 # GCC flags
 #
@@ -32,9 +32,10 @@ CFLAGS = -g -mthumb -mcpu=cortex-m4 -mfpu=fpv4-sp-d16 -mfloat-abi=hard
 CFLAGS +=-Os -ffunction-sections -fdata-sections -MD -std=c99
 CFLAGS += -pedantic -DPART_TM4C123GH6PM -c
 CFLAGS += -DTARGET_IS_TM4C123_RB2
-CFLAGS += -Dgcc 
+CFLAGS += -Dgcc
 #CFLAGS = -mcpu=cortex-m4 -march=armv7e-m -mthumb -mfloat-abi=hard -mfpu=fpv4-sp-d16 -Dgcc -DPART_TM4C123GH6PM -DTARGET_IS_TM4C123_RB1 -ffunction-sections -fdata-sections -g -gdwarf-3 -gstrict-dwarf -specs="nosys.specs" -MD -std=c99 -I$(TC_PATH)arm-none-eabi/include/
 
+LTO_PLUGIN = $(shell arm-none-eabi-gcc --print-file-name=liblto_plugin.so)
 LDFLAGS = -T $(LINKER_SCRIPT) --entry ResetISR --gc-sections
 
 # Default debug off unless ran with make debug
@@ -166,7 +167,7 @@ dbg:
 	arm-none-eabi-gdb $(ELF_IMAGE)
 
 $(TARGET) : $(OBJDIR) $(ELF_IMAGE)
-	$(OBJCOPY) -O binary $(word 2,$^) $@
+	$(OBJCOPY) -O binary $(word 2,$^) $@ && ./utils/static_usage.bash image.elf
 
 $(OBJDIR) :
 	mkdir -p $@ $(OBJDIR)$(TASKDIR) $(OBJDIR)lib/ $(OBJDIR)$(INTERRUPTS)
@@ -201,6 +202,8 @@ $(OBJDIR)%.o: $(FREERTOS_PORT_SRC)%.c $(DEP_FRTOS_CONFIG)
 $(OBJDIR)%.o: $(QUBOBUS_SRC)%.c $(INC_QUBOBUS)*
 	$(CC) $(CFLAG) $(CFLAGS) $(INC_FLAGS) $< $(OFLAG) $@
 
+usage:
+	./utils/static_usage.bash image.elf
 
 # Cleanup directives:
 
