@@ -41,6 +41,8 @@
 #include "interrupts/include/i2c2_interrupt.h"
 #include "interrupts/include/i2c3_interrupt.h"
 
+#include "interrupts/include/usb0_interrupt.h"
+
 //*****************************************************************************
 //
 // Forward declaration of the default fault handlers.
@@ -146,7 +148,7 @@ void (* const g_pfnVectors[])(void) =
     0,                                      // Reserved
     0,                                      // Reserved
     IntDefaultHandler,                      // Hibernate
-    IntDefaultHandler,   	                // USB0
+    USB0IntHandler,   	                    // USB0
     IntDefaultHandler,                      // PWM Generator 3
     IntDefaultHandler,                      // uDMA Software Transfer
     IntDefaultHandler,                      // uDMA Error

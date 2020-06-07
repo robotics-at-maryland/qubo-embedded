@@ -5,8 +5,37 @@
 */
 
 #include "include/configure.h"
+
+/* Standard module includes */
+#include <stdbool.h>
+#include <stdint.h>
+
+/* Driver includes */
 #include <inc/tm4c123gh6pm.h>
+#include <inc/hw_memmap.h>
+#include <inc/hw_types.h>
+#include <driverlib/interrupt.h>
+#include <driverlib/gpio.h>
+#include <driverlib/i2c.h>
+#include <driverlib/pin_map.h>
+#include <driverlib/rom.h>
+#include <driverlib/sysctl.h>
+#include <driverlib/uart.h>
 #include <driverlib/pwm.h>
+#include <driverlib/usb.h>
+
+
+
+// Following instructions in Section 18.4 (page 1113) of the TM4C123GH6PM Revision E datasheet (SPMS376E)
+void configureUSB(void) {
+
+  // Enable the USB Clock Region
+//  USBClockEnable(USB0_BASE, 2, USB_CLOCK_INTERNAL);
+
+  ROM_SysCtlPeripheralEnable(SYSCTL_PERIPH_GPIOD);
+
+}
+
 
 // Need to configure pins PD0, PD1, PE4, PE5, PF0, PF1, PF2, and PF3 for PWM operation
 // NOTE: This goes through the steps on page 1239 of the TM4C123G Datasheet

@@ -4,7 +4,7 @@
 */
 
 /*
-  USB 2.0 Type Definitions
+  USB 2.0 Type Definitions. See Chapters 4, 5, and 9 of the USB 2.0 spec for details.
   We plan to use tiva as a USB Device. System sensor data will be transported over the
   USB interface to the Jetson for logging and processing.
  */
@@ -21,21 +21,7 @@
 
 /*========== TYPE DEFINITIONS AND ENUMS ==========*/
 
-enum RequestTypes {
-  GET_STATUS        = 0,
-  CLEAR_FEATURE     = 1,
-  RESERVED_0        = 2,
-  SET_FEATURE       = 3,
-  RESERVED_1        = 4,
-  SET_ADDRESS       = 5,
-  GET_DESCRIPTOR    = 6,
-  SET_DESCRIPTOR    = 7,
-  GET_CONFIGURATION = 8,
-  SET_CONFIGURATION = 9,
-  GET_INTERFACE     = 10,
-  SET_INTERFACE     = 11,
-  SYNCH_FRAME       = 12
-};
+
 
 enum DescriptorTypes {
   DEVICE                    = 1,
@@ -93,6 +79,23 @@ typedef struct __attribute__((packed)) DeviceRequest {
 #define REQUEST_TYPE_RECP_INTERFACE 0x01
 #define REQUEST_TYPE_RECP_ENDPOINT  0x02
 #define REQUEST_TYPE_RECP_OTHER     0x03
+
+/* bRequest: Standard Request Codes (Table 9-4) */
+enum RequestTypes {
+  GET_STATUS        = 0,
+  CLEAR_FEATURE     = 1,
+  RESERVED_0        = 2,
+  SET_FEATURE       = 3,
+  RESERVED_1        = 4,
+  SET_ADDRESS       = 5,
+  GET_DESCRIPTOR    = 6,
+  SET_DESCRIPTOR    = 7,
+  GET_CONFIGURATION = 8,
+  SET_CONFIGURATION = 9,
+  GET_INTERFACE     = 10,
+  SET_INTERFACE     = 11,
+  SYNCH_FRAME       = 12
+};
 
 
 /*========== DESCRIPTOR DEFINITIONS ==========*/

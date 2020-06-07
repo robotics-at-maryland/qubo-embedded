@@ -149,6 +149,7 @@ int main() {
 
   configureUART();
 //  configureGPIO(); // FIXME: Determine suitable PWM outputs to replace pins PF0-PF4
+  configureUSB();
   configureI2C();
   configurePWM();
 
