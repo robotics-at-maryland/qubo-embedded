@@ -29,10 +29,76 @@
 // Following instructions in Section 18.4 (page 1113) of the TM4C123GH6PM Revision E datasheet (SPMS376E)
 void configureUSB(void) {
 
-  // Enable the USB Clock Region
-//  USBClockEnable(USB0_BASE, 2, USB_CLOCK_INTERNAL);
+  /* STEPS:
+       Enable peripheral clock via RCGCUSB reg
+
+       Clock to appropriate GPIO module via RCGCGPIO reg (SysCtl)
+
+       Configured PMCn fields in GPIOPCTL reg to assign USB signals
+         Signals to configure:
+           A USB0DM (D-)
+           A USB0DP (D+)
+           A USB0ID   ?
+               We want to write 0x3 to USBGPCS register to set the internal ID signal to
+               device non OTG mode
+           A USB0VBUS ?
+               We are operating as self-powered device. We must monitor this signal.
+               In the event the Host disconnects it, we need to disable the D+/D- pullups
+
+               We could attach a GPIO to this and set a falling edge interrupt to configure
+               the pull-up resistors correctly
+
+           D USB0EPEN ? (External Power Enable)
+               Self powered device, so we keep this low
+           D USB0PFLT ? (USB Power Fault)
+
+
+       Enable USB Controller and USB PHY
+
+       Enable USB PLL to ensure correct clocking is configured for PHY
+         - at least 20 MHz
+         - Main Oscillator Clock Source (either with or w/o PLL, doesn't matter)
+
+       USB0EPEN should be negated on start-up by configuring USB0EPEN and USB0PFLT pins
+       to be controlled by the USB controller
+
+       @note We want to disable power to VBUS to allow the Host to supply power
+
+   */
+
+  /*
+     Enable peripheral clock via RCGCUSB reg
+     Peripheral enable configures the RCGC register for the corresponding peripheral
+  */
+  ROM_SysCtlPeripheralEnable(SYSCTL_PERIPH_USB0);
+  while(!ROM_SysCtlPeripheralReady(SYSCTL_PERIPH_USB0))
+  {
+  }
+
+  /*
+     Clock to appropriate GPIO module via RCGCGPIO reg (SysCtl)
+     We want port D (see table 10-2)
+  */
+  ROM_SysCtlPeripheralEnable(SYSCTL_PERIPH_GPIOB);
+  while(!ROM_SysCtlPeripheralReady(SYSCTL_PERIPH_GPIOB))
+  {
+  }
+
+  ROM_GPIOPinTypeUSBAnalog(USB0_BASE, 0x30); // 0x30 = 0011_0000, 1 for PD5 and PD4
+
 
   ROM_SysCtlPeripheralEnable(SYSCTL_PERIPH_GPIOD);
+  while(!ROM_SysCtlPeripheralReady(SYSCTL_PERIPH_GPIOD))
+  {
+  }
+
+
+
+  // Enable the USB PHY Clock
+  USBClockEnable(USB0_BASE, 2, USB_CLOCK_INTERNAL);
+
+
+
 
 }
 
