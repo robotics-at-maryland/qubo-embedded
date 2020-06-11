@@ -105,7 +105,7 @@ FREERTOS_MEMMANG_OBJS = heap_4.o
  FREERTOS_PORT_OBJS = port.o
 
 # Driver object lists to tivaware libs
-DRIVERLIB_OBJS := $(wildcard $(OBJDIR)driverlib/*.o)
+DRIVERLIB_OBJS = $(wildcard $(OBJDIR)driverlib/*.o)
 DRIVERLIB_OBJS := $(DRIVERLIB_OBJS) $(wildcard $(OBJDIR)driverlib/*.a)
 UTILS_OBJS = $(wildcard $(OBJDIR)utils/*.o)
 
@@ -204,6 +204,9 @@ $(OBJDIR)%.o: $(QUBOBUS_SRC)%.c $(INC_QUBOBUS)*
 
 usage:
 	./utils/static_usage.bash image.elf
+
+drivers:
+	cd drivers && make
 
 # Cleanup directives:
 
