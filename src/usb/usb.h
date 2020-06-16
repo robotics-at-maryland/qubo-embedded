@@ -9,19 +9,16 @@
   USB interface to the Jetson for logging and processing.
  */
 
-#ifndef __USB_TYPES_H_
-#define __USB_TYPES_H_
+#ifndef __USB_STACK_H__
+#define __USB_STACK_H__
 
 #include <stdint.h>
-
 
 // TODO: Standard Request Definitions
 // TODO: Descriptor field value definitions
 // TODO: USB Device States
 
 /*========== TYPE DEFINITIONS AND ENUMS ==========*/
-
-
 
 enum DescriptorTypes {
   DEVICE                    = 1,
@@ -40,6 +37,8 @@ enum StandardFeatureSelectors {
   TEST_MODE = 2
 };
 
+
+void USB0IntHandler(void);
 /*========== VISIBLE STATE DEFINITIONS ==========*/
 
 /*
@@ -52,9 +51,9 @@ enum VisibleStates {
   DEFAULT    = 3,
   ADDRESS    = 4,
   CONFIGURED = 5
-};
+} USB_states_t;
 
-
+typedef uint8_t usb_state_t;
 /*========== REQUEST DEFINITIONS ==========*/
 
 typedef struct __attribute__((packed)) DeviceRequest {
@@ -172,4 +171,4 @@ typedef struct __attribute__((packed)) EndpointDesc {
   uint8_t  bInterval;
 } EndpointDesc_t;
 
-#endif // __USB_TYPES_H_
+#endif // __USB_STACK_H__

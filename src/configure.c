@@ -23,7 +23,7 @@
 #include <driverlib/uart.h>
 #include <driverlib/pwm.h>
 #include <driverlib/usb.h>
-
+#include <driverlib/rom_map.h>
 
 
 // Following instructions in Section 18.4 (page 1113) of the TM4C123GH6PM Revision E datasheet (SPMS376E)
@@ -34,24 +34,36 @@ void configureUSB(void) {
 
        Clock to appropriate GPIO module via RCGCGPIO reg (SysCtl)
 
-       Configured PMCn fields in GPIOPCTL reg to assign USB signals
+       Configure PMCn fields in GPIOPCTL reg to assign USB signals
+         Consider the following registers:
+           GPIOAFSEL
+           GPIODEN
+           GPIOPDR
+           GPIOPUR
+           GPIOPCTL
+
+           GPIOAMSEL
+
          Signals to configure:
-           A USB0DM (D-)
-           A USB0DP (D+)
-           A USB0ID   ?
+           A USB0DM (D-): PD4
+           A USB0DP (D+): PD5
+           A USB0ID     :
+
                We want to write 0x3 to USBGPCS register to set the internal ID signal to
                device non OTG mode
-           A USB0VBUS ?
+
+           A USB0VBUS   : PB1
+
                We are operating as self-powered device. We must monitor this signal.
                In the event the Host disconnects it, we need to disable the D+/D- pullups
 
                We could attach a GPIO to this and set a falling edge interrupt to configure
                the pull-up resistors correctly
 
-           D USB0EPEN ? (External Power Enable)
+           D USB0EPEN  (External Power Enable): PB0
                Self powered device, so we keep this low
-           D USB0PFLT ? (USB Power Fault)
-
+           D USB0PFLT  (USB Power Fault)
+               Not needed, used in Host mode
 
        Enable USB Controller and USB PHY
 
@@ -67,24 +79,33 @@ void configureUSB(void) {
    */
 
   /*
-     Enable peripheral clock via RCGCUSB reg
-     Peripheral enable configures the RCGC register for the corresponding peripheral
-  */
-  ROM_SysCtlPeripheralEnable(SYSCTL_PERIPH_USB0);
-  while(!ROM_SysCtlPeripheralReady(SYSCTL_PERIPH_USB0))
+   * Enable peripheral clock via RCGCUSB reg
+   * Peripheral enable configures the RCGC register for the corresponding peripheral
+   */
+  MAP_SysCtlPeripheralEnable(SYSCTL_PERIPH_USB0);
+  while(!MAP_SysCtlPeripheralReady(SYSCTL_PERIPH_USB0))
   {
   }
+
+  MAP_SysCtlUSBPLLEnable();
+  MAP_USBClockEnable(USB0_BASE, 4, USB_CLOCK_INTERNAL);
+
 
   /*
-     Clock to appropriate GPIO module via RCGCGPIO reg (SysCtl)
-     We want port D (see table 10-2)
-  */
-  ROM_SysCtlPeripheralEnable(SYSCTL_PERIPH_GPIOB);
-  while(!ROM_SysCtlPeripheralReady(SYSCTL_PERIPH_GPIOB))
+   * Clock to appropriate GPIO module via RCGCGPIO reg (SysCtl)
+   * Ports B and D are required for device operation
+   */
+  #if 0
+  MAP_SysCtlPeripheralEnable(SYSCTL_PERIPH_GPIOB);
+  while(!MAP_SysCtlPeripheralReady(SYSCTL_PERIPH_GPIOB))
   {
   }
 
-  ROM_GPIOPinTypeUSBAnalog(USB0_BASE, 0x30); // 0x30 = 0011_0000, 1 for PD5 and PD4
+  ROM_GPIOPinTypeUSBAnalog(GPIO_PORTB_BASE, GPIO_PIN_1);
+  ROM_GPIOIntTypeSet(GPIO_PORTB_BASE, GPIO_PIN_1, GPIO_k0LEVEL_HIGH);
+  GPIOIntEnable(GPIO_PORTB_BASE, GPIO_PIN_1);
+  ROM_IntEnable(INT_GPIOB);
+  #endif
 
 
   ROM_SysCtlPeripheralEnable(SYSCTL_PERIPH_GPIOD);
@@ -92,14 +113,21 @@ void configureUSB(void) {
   {
   }
 
+  ROM_GPIOPinTypeUSBAnalog(GPIO_PORTD_BASE, GPIO_PIN_4 | GPIO_PIN_5);
 
+  MAP_USBIntStatusControl(USB0_BASE);
+  MAP_USBIntStatusEndpoint(USB0_BASE);
 
-  // Enable the USB PHY Clock
-  USBClockEnable(USB0_BASE, 2, USB_CLOCK_INTERNAL);
-
-
-
-
+  //
+  // Enable USB Interrupts.
+  //
+  MAP_USBIntEnableControl(USB0_BASE, USB_INTCTRL_RESET |
+                                     USB_INTCTRL_DISCONNECT |
+                                     USB_INTCTRL_RESUME |
+                                     USB_INTCTRL_SUSPEND |
+                                     USB_INTCTRL_SOF);
+  MAP_USBIntEnableEndpoint(USB0_BASE, USB_INTEP_ALL);
+  MAP_IntEnable(INT_USB0);
 }
 
 

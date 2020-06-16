@@ -1,6 +1,6 @@
-#include "interrupts/include/usb0_interrupt.h"
+#include <stdint.h>
+#include <stdbool.h>
 
-void USB0IntHandler(void) {
-  // TODO: Identify endpoint that caused interrupt
-  for(;;) {};
-}
+#include "interrupts/include/usb0_interrupt.h"
+#include "driverlib/usb.h"
+#include "inc/hw_memmap.h"

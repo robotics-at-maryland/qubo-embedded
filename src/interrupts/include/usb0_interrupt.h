@@ -4,6 +4,5 @@
 
 // TODO: Add any necessary defines
 
-void USB0IntHandler(void);
 
 #endif // __USB0_INTERRUPT_H_

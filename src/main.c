@@ -58,7 +58,6 @@
 #include "include/uart1_mutex.h"
 #include "include/rgb_mutex.h"
 #include "include/read_uart1_queue.h"
-
 /* #include "include/task_handles.h" */
 /* #include "include/task_queues.h" */
 /* #include "tasks/include/qubobus_test.h" */
@@ -147,17 +146,19 @@ int main() {
                      SYSCTL_OSC_MAIN);
 
 
-  configureUART();
-//  configureGPIO(); // FIXME: Determine suitable PWM outputs to replace pins PF0-PF4
+//  configureUART();
   configureUSB();
-  configureI2C();
-  configurePWM();
+//  configureI2C();
+//  configurePWM();
 
   /* USB_serial_configure(); */
 
   // Master enable interrupts
   ROM_IntMasterEnable();
 
+  USBDevConnect(USB0_BASE);
+
+  while (1) {};
   // -----------------------------------------------------------------------
   // Allocate FreeRTOS data structures for tasks, these are automatically made in heap
   // -----------------------------------------------------------------------

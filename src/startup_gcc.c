@@ -41,8 +41,7 @@
 #include "interrupts/include/i2c2_interrupt.h"
 #include "interrupts/include/i2c3_interrupt.h"
 
-#include "interrupts/include/usb0_interrupt.h"
-
+#include "usb/usb.h"
 //*****************************************************************************
 //
 // Forward declaration of the default fault handlers.
@@ -105,7 +104,7 @@ void (* const g_pfnVectors[])(void) =
     xPortPendSVHandler,                     // The PendSV handler
     xPortSysTickHandler,                    // The SysTick handler
     IntDefaultHandler,                      // GPIO Port A
-    IntDefaultHandler,                      // GPIO Port B
+    USB0IntHandler,                         // GPIO Port B
     IntDefaultHandler,                      // GPIO Port C
     IntDefaultHandler,                      // GPIO Port D
     IntDefaultHandler,                      // GPIO Port E

@@ -60,6 +60,8 @@ INTERRUPTS = interrupts/
 # Intermediate directory for all *.o and other files:
 OBJDIR = obj/
 
+USB = usb/
+
 # These objects are needed for linking
 LIBGCC = $(shell $(CC) $(CFLAGS) -print-libgcc-file-name)
 LIBC = $(shell $(CC) $(CFLAGS) -print-file-name=libc.a)
@@ -114,7 +116,8 @@ USBLIB_OBJS = $(wildcard $(OBJDIR)usblib/*.o)
 TIVA_DRIVER_OBJS = $(DRIVERLIB_OBJS)
 
 # List of source file objects. Adds any c file in $(SRC) and $(SRC)$(TASKDIR)
-SRC_C_FILES = $(wildcard $(SRC)*.c) $(wildcard $(SRC)$(TASKDIR)*.c) $(wildcard $(SRC)lib/*.c) $(wildcard $(SRC)$(INTERRUPTS)*.c)
+SRC_C_FILES = $(wildcard $(SRC)*.c) $(wildcard $(SRC)$(TASKDIR)*.c) $(wildcard $(SRC)lib/*.c) \
+	$(wildcard $(SRC)$(INTERRUPTS)*.c) $(wildcard $(SRC)$(USB)*.c)
 SRC_OBJS := $(SRC_C_FILES:$(SRC)%=%)
 SRC_OBJS := $(SRC_OBJS:.c=.o)
 
@@ -170,7 +173,7 @@ $(TARGET) : $(OBJDIR) $(ELF_IMAGE)
 	$(OBJCOPY) -O binary $(word 2,$^) $@ && ./utils/static_usage.bash image.elf
 
 $(OBJDIR) :
-	mkdir -p $@ $(OBJDIR)$(TASKDIR) $(OBJDIR)lib/ $(OBJDIR)$(INTERRUPTS)
+	mkdir -p $@ $(OBJDIR)$(TASKDIR) $(OBJDIR)lib/ $(OBJDIR)$(INTERRUPTS) $(OBJDIR)usb/
 
 $(ELF_IMAGE) : $(OBJS) $(LIBC) $(LIBM) $(LIBGCC)
 	@if [ $(DEBUG) = "ON" ]; then \
