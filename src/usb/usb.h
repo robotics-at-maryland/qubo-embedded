@@ -21,14 +21,14 @@
 /*========== TYPE DEFINITIONS AND ENUMS ==========*/
 
 enum DescriptorTypes {
-  DEVICE                    = 1,
-  CONFIGURATION             = 2,
-  STRING                    = 3,
-  INTERFACE                 = 4,
-  ENDPOINT                  = 5,
-  DEVICE_QUALIFIER          = 6,
-  OTHER_SPEED_CONFIGURATION = 7,
-  INTERFACE_POWER           = 8
+  DEVICE_DESC                    = 1,
+  CONFIGURATION_DESC             = 2,
+  STRING_DESC                    = 3,
+  INTERFACE_DESC                 = 4,
+  ENDPOINT_DESC                  = 5,
+  DEVICE_QUALIFIER_DESC          = 6,
+  OTHER_SPEED_CONFIGURATION_DESC = 7,
+  INTERFACE_POWER_DESC           = 8
 };
 
 enum StandardFeatureSelectors {
