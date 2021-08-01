@@ -17,8 +17,8 @@
 #include "qubobus.h"
 #include "io.h"
 
-extern struct UART_Queue uart0_queue;
-extern struct UART_Queue uart1_queue;
+struct UART_Queue uart0_queue;
+struct UART_Queue uart1_queue;
 static char buffer[QUBOBUS_MAX_PAYLOAD_LENGTH];
 
 bool read_uart0_init(void) {

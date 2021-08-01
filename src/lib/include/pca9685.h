@@ -48,13 +48,11 @@
 #define ALLLED_OFF_H 0xFD
 
 
-
 void pca9685_begin(uint32_t device, uint8_t addr);
 void pca9685_reset(uint32_t device);
 void pca9685_setPWMFreq(uint32_t device, float freq);
 void pca9685_setPWM(uint32_t device, uint8_t num, uint16_t on, uint16_t off);
 void pca9685_setPin(uint32_t device, uint8_t num, uint16_t val, bool invert);
-
 
 static uint8_t _i2caddr;
 

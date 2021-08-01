@@ -24,13 +24,12 @@
 // TODO: Need to set thrust limiting to ensure we don't draw too much current
 
 // which bus on the Tiva the PCA9685 is connected to
-// FIXME: Find a better way to do this, it's messy and can cause headaches
-#define I2C_BUS I2C0_BASE
+#define PCA_I2C_BASE I2C0_BASE
 
 // I2C address of the PCA9685
 #define PCA_ADDR 0xBF
 
-// Frequency of the PWM on the PCA9685.  It's a float.
+// Frequency of the PWM on the PCA9685 (float)
 #define PWM_FREQ 244.0
 
 // Maximum time, in microseconds, to set the PWM to

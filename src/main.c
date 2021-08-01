@@ -4,11 +4,11 @@
    naterenegar@gmail.com
 */
 
-//QSCU
+// QSCU
 #include "include/configure.h"
 #include "include/task_constants.h"
 #include "tasks/include/read_uart0.h"
-#include "tasks/include/read_uart1.h"
+//#include "tasks/include/read_uart1.h"
 #include "tasks/include/example_blink.h"
 #include "tasks/include/example_uart.h"
 #include "tasks/include/tiqu.h"
@@ -44,65 +44,22 @@
 #include "lib/include/uart_queue.h"
 #include "interrupts/include/uart0_interrupt.h"
 
+#include "lib/include/query_i2c.h"
+
 // Globals
-#include "include/i2c0_mutex.h"
-#include "include/i2c1_mutex.h"
-#include "include/i2c2_mutex.h"
-#include "include/i2c3_mutex.h"
-
-#include "include/i2c0_globals.h"
-#include "include/i2c1_globals.h"
-#include "include/i2c2_globals.h"
-#include "include/i2c3_globals.h"
-
 #include "include/uart1_mutex.h"
 #include "include/rgb_mutex.h"
-#include "include/read_uart1_queue.h"
+//#include "include/read_uart1_queue.h"
 
 /* #include "include/task_handles.h" */
 /* #include "include/task_queues.h" */
 /* #include "tasks/include/qubobus_test.h" */
 
-
-SemaphoreHandle_t i2c0_mutex;
-SemaphoreHandle_t i2c1_mutex;
-SemaphoreHandle_t i2c2_mutex;
-SemaphoreHandle_t i2c3_mutex;
-
 SemaphoreHandle_t uart1_mutex;
 SemaphoreHandle_t rgb_mutex;
 
-volatile uint32_t *i2c0_address;
-volatile uint8_t **i2c0_read_buffer;
-volatile uint8_t **i2c0_write_buffer;
-volatile uint32_t *i2c0_read_count;
-volatile uint32_t *i2c0_write_count;
-volatile uint16_t *i2c0_int_state;
-
-volatile uint32_t *i2c1_address;
-volatile uint8_t **i2c1_read_buffer;
-volatile uint8_t **i2c1_write_buffer;
-volatile uint32_t *i2c1_read_count;
-volatile uint32_t *i2c1_write_count;
-volatile uint16_t *i2c1_int_state;
-
-volatile uint32_t *i2c2_address;
-volatile uint8_t **i2c2_read_buffer;
-volatile uint8_t **i2c2_write_buffer;
-volatile uint32_t *i2c2_read_count;
-volatile uint32_t *i2c2_write_count;
-volatile uint16_t *i2c2_int_state;
-
-volatile uint32_t *i2c3_address;
-volatile uint8_t **i2c3_read_buffer;
-volatile uint8_t **i2c3_write_buffer;
-volatile uint32_t *i2c3_read_count;
-volatile uint32_t *i2c3_write_count;
-volatile uint16_t *i2c3_int_state;
-
-
-volatile struct UART_Queue uart0_queue;
-volatile struct UART_Queue uart1_queue;
+extern volatile struct UART_Queue uart0_queue;
+extern volatile struct UART_Queue uart1_queue;
 
 QueueHandle_t thruster_message_buffer;
 
@@ -146,28 +103,20 @@ int main() {
   ROM_SysCtlClockSet(SYSCTL_SYSDIV_4 | SYSCTL_USE_PLL | SYSCTL_XTAL_16MHZ |
                      SYSCTL_OSC_MAIN);
 
-
   configureUART();
-//  configureGPIO(); // FIXME: Determine suitable PWM outputs to replace pins PF0-PF4
-  configureI2C();
+  configureGPIO(); // FIXME: Determine suitable PWM outputs to replace pins PF0-PF4
+//  configureI2C();
   configurePWM();
 
   /* USB_serial_configure(); */
 
-  // Master enable interrupts
-  ROM_IntMasterEnable();
+
+    uart1_mutex = xSemaphoreCreateMutex();
+    rgb_mutex = xSemaphoreCreateMutex();
 
   // -----------------------------------------------------------------------
   // Allocate FreeRTOS data structures for tasks, these are automatically made in heap
   // -----------------------------------------------------------------------
-
-  i2c0_mutex  = xSemaphoreCreateMutex();
-  i2c1_mutex  = xSemaphoreCreateMutex();
-  i2c2_mutex  = xSemaphoreCreateMutex();
-  i2c3_mutex  = xSemaphoreCreateMutex();
-  uart1_mutex = xSemaphoreCreateMutex();
-  rgb_mutex   = xSemaphoreCreateMutex();
-
 
   // Initialize the UART Queue for UART0.
   INIT_UART_QUEUE(uart0_queue, 256, 256, INT_UART0, UART0_BASE, pdMS_TO_TICKS(1000));
@@ -177,33 +126,10 @@ int main() {
 
   thruster_message_buffer = xQueueCreate(1, sizeof(struct Thruster_Set));
 
-  i2c0_address      = pvPortMalloc(sizeof(uint32_t));
-  i2c0_read_buffer  = pvPortMalloc(sizeof(uint8_t*));
-  i2c0_write_buffer = pvPortMalloc(sizeof(uint8_t*));
-  i2c0_read_count   = pvPortMalloc(sizeof(uint32_t));
-  i2c0_write_count  = pvPortMalloc(sizeof(uint32_t));
-  i2c0_int_state    = pvPortMalloc(sizeof(uint16_t));
+  //initI2C();
 
-  i2c1_address      = pvPortMalloc(sizeof(uint32_t));
-  i2c1_read_buffer  = pvPortMalloc(sizeof(uint8_t*));
-  i2c1_write_buffer = pvPortMalloc(sizeof(uint8_t*));
-  i2c1_read_count   = pvPortMalloc(sizeof(uint32_t));
-  i2c1_write_count  = pvPortMalloc(sizeof(uint32_t));
-  i2c1_int_state    = pvPortMalloc(sizeof(uint16_t));
-
-  i2c2_address      = pvPortMalloc(sizeof(uint32_t));
-  i2c2_read_buffer  = pvPortMalloc(sizeof(uint8_t*));
-  i2c2_write_buffer = pvPortMalloc(sizeof(uint8_t*));
-  i2c2_read_count   = pvPortMalloc(sizeof(uint32_t));
-  i2c2_write_count  = pvPortMalloc(sizeof(uint32_t));
-  i2c2_int_state    = pvPortMalloc(sizeof(uint16_t));
-
-  i2c3_address      = pvPortMalloc(sizeof(uint32_t));
-  i2c3_read_buffer  = pvPortMalloc(sizeof(uint8_t*));
-  i2c3_write_buffer = pvPortMalloc(sizeof(uint8_t*));
-  i2c3_read_count   = pvPortMalloc(sizeof(uint32_t));
-  i2c3_write_count  = pvPortMalloc(sizeof(uint32_t));
-  i2c3_int_state    = pvPortMalloc(sizeof(uint16_t));
+  // Master enable interrupts
+  ROM_IntMasterEnable();
 
 #ifdef DEBUG
   UARTprintf("Datastructures allocated\n");

@@ -17,8 +17,9 @@ void configurePWM(void) {
   while(!ROM_SysCtlPeripheralReady(SYSCTL_PERIPH_GPIOD))
   {
   }
-  ROM_SysCtlPeripheralEnable(SYSCTL_PERIPH_GPIOE);
-  while(!ROM_SysCtlPeripheralReady(SYSCTL_PERIPH_GPIOE))
+
+  ROM_SysCtlPeripheralEnable(SYSCTL_PERIPH_GPIOA);
+  while(!ROM_SysCtlPeripheralReady(SYSCTL_PERIPH_GPIOA))
   {
   }
 
@@ -43,8 +44,8 @@ void configurePWM(void) {
   // Set the alternate function of each pin to be PWM
   ROM_GPIOPinConfigure(GPIO_PD0_M1PWM0);
   ROM_GPIOPinConfigure(GPIO_PD1_M1PWM1);
-  ROM_GPIOPinConfigure(GPIO_PE4_M1PWM2);
-  ROM_GPIOPinConfigure(GPIO_PE5_M1PWM3);
+  ROM_GPIOPinConfigure(GPIO_PA6_M1PWM2);
+  ROM_GPIOPinConfigure(GPIO_PA7_M1PWM3);
   ROM_GPIOPinConfigure(GPIO_PF0_M1PWM4);
   ROM_GPIOPinConfigure(GPIO_PF1_M1PWM5);
   ROM_GPIOPinConfigure(GPIO_PF2_M1PWM6);
@@ -52,13 +53,12 @@ void configurePWM(void) {
 
   // Configure pins to be used by PWM peripheral
   ROM_GPIOPinTypePWM(GPIO_PORTD_BASE, GPIO_PIN_0 | GPIO_PIN_1);
-  ROM_GPIOPinTypePWM(GPIO_PORTE_BASE, GPIO_PIN_4 | GPIO_PIN_5);
+  ROM_GPIOPinTypePWM(GPIO_PORTA_BASE, GPIO_PIN_6 | GPIO_PIN_7);
   ROM_GPIOPinTypePWM(GPIO_PORTF_BASE, GPIO_PIN_0 | GPIO_PIN_1 |
                      GPIO_PIN_2 | GPIO_PIN_3);
 
 
   // Configure PWM Generators 0-3 for countdown mode with immediate updates
-
   ROM_PWMGenConfigure(PWM1_BASE, PWM_GEN_0, PWM_GEN_MODE_DOWN | PWM_GEN_MODE_NO_SYNC);
   ROM_PWMGenConfigure(PWM1_BASE, PWM_GEN_1, PWM_GEN_MODE_DOWN | PWM_GEN_MODE_NO_SYNC);
   ROM_PWMGenConfigure(PWM1_BASE, PWM_GEN_2, PWM_GEN_MODE_DOWN | PWM_GEN_MODE_NO_SYNC);
@@ -71,7 +71,6 @@ void configurePWM(void) {
   ROM_PWMGenPeriodSet(PWM1_BASE, PWM_GEN_1, 31250 - 1);
   ROM_PWMGenPeriodSet(PWM1_BASE, PWM_GEN_2, 31250 - 1);
   ROM_PWMGenPeriodSet(PWM1_BASE, PWM_GEN_3, 31250 - 1);
-
 }
 
 void configureUART(void)
@@ -218,7 +217,6 @@ void configureI2C(void) {
   // Enable the I2C interrupt.
   //
   ROM_IntEnable(INT_I2C0);
-  ROM_IntEnable(INT_I2C3);
 
   #ifdef DEBUG
   UARTprintf("I2C configured\n");

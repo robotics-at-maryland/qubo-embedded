@@ -7,6 +7,8 @@
 
 #include "lib/include/rgb.h"
 
+SemaphoreHandle_t rgb_mutex;
+
 void blink_rgb(uint8_t color, uint8_t n) {
 
   // If the RGB is busy, yield task and then try again

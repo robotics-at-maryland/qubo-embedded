@@ -5,6 +5,99 @@
 
 #include "lib/include/query_i2c.h"
 
+/* FreeRTOS Includes */
+#include <FreeRTOS.h>
+#include <queue.h>
+#include <task.h>
+#include <semphr.h>
+#include <message_buffer.h>
+
+// Generic pointers that will be overwritten with specified globals
+SemaphoreHandle_t *i2c_mutex;
+volatile uint32_t *i2c_address;
+volatile uint8_t **i2c_read_buffer;
+volatile uint8_t **i2c_write_buffer;
+volatile uint32_t *i2c_read_count;
+volatile uint32_t *i2c_write_count;
+volatile uint16_t *i2c_int_state;
+
+// Mutex on I2C bus, declared extern so it exists for all classes using this lib
+SemaphoreHandle_t i2c0_mutex;
+SemaphoreHandle_t i2c1_mutex;
+SemaphoreHandle_t i2c2_mutex;
+SemaphoreHandle_t i2c3_mutex;
+
+volatile uint32_t *i2c0_address;
+volatile uint8_t **i2c0_read_buffer;
+volatile uint8_t **i2c0_write_buffer;
+volatile uint32_t *i2c0_read_count;
+volatile uint32_t *i2c0_write_count;
+volatile uint16_t *i2c0_int_state;
+
+volatile uint32_t *i2c1_address;
+volatile uint8_t **i2c1_read_buffer;
+volatile uint8_t **i2c1_write_buffer;
+volatile uint32_t *i2c1_read_count;
+volatile uint32_t *i2c1_write_count;
+volatile uint16_t *i2c1_int_state;
+
+volatile uint32_t *i2c2_address;
+volatile uint8_t **i2c2_read_buffer;
+volatile uint8_t **i2c2_write_buffer;
+volatile uint32_t *i2c2_read_count;
+volatile uint32_t *i2c2_write_count;
+volatile uint16_t *i2c2_int_state;
+
+volatile uint32_t *i2c3_address;
+volatile uint8_t **i2c3_read_buffer;
+volatile uint8_t **i2c3_write_buffer;
+volatile uint32_t *i2c3_read_count;
+volatile uint32_t *i2c3_write_count;
+volatile uint16_t *i2c3_int_state;
+
+// TODO: Do error checking on all of these
+int initI2C(void)
+{
+    i2c0_mutex  = xSemaphoreCreateMutex();
+    i2c1_mutex  = xSemaphoreCreateMutex();
+    i2c2_mutex  = xSemaphoreCreateMutex();
+    i2c3_mutex  = xSemaphoreCreateMutex();
+
+    i2c0_address      = pvPortMalloc(sizeof(uint32_t));
+    i2c0_read_buffer  = pvPortMalloc(sizeof(uint8_t*));
+    i2c0_write_buffer = pvPortMalloc(sizeof(uint8_t*));
+    i2c0_read_count   = pvPortMalloc(sizeof(uint32_t));
+    i2c0_write_count  = pvPortMalloc(sizeof(uint32_t));
+    i2c0_int_state    = pvPortMalloc(sizeof(uint16_t));
+
+    i2c1_address      = pvPortMalloc(sizeof(uint32_t));
+    i2c1_read_buffer  = pvPortMalloc(sizeof(uint8_t*));
+    i2c1_write_buffer = pvPortMalloc(sizeof(uint8_t*));
+    i2c1_read_count   = pvPortMalloc(sizeof(uint32_t));
+    i2c1_write_count  = pvPortMalloc(sizeof(uint32_t));
+    i2c1_int_state    = pvPortMalloc(sizeof(uint16_t));
+
+    i2c2_address      = pvPortMalloc(sizeof(uint32_t));
+    i2c2_read_buffer  = pvPortMalloc(sizeof(uint8_t*));
+    i2c2_write_buffer = pvPortMalloc(sizeof(uint8_t*));
+    i2c2_read_count   = pvPortMalloc(sizeof(uint32_t));
+    i2c2_write_count  = pvPortMalloc(sizeof(uint32_t));
+    i2c2_int_state    = pvPortMalloc(sizeof(uint16_t));
+
+    i2c3_address      = pvPortMalloc(sizeof(uint32_t));
+    i2c3_read_buffer  = pvPortMalloc(sizeof(uint8_t*));
+    i2c3_write_buffer = pvPortMalloc(sizeof(uint8_t*));
+    i2c3_read_count   = pvPortMalloc(sizeof(uint32_t));
+    i2c3_write_count  = pvPortMalloc(sizeof(uint32_t));
+    i2c3_int_state    = pvPortMalloc(sizeof(uint16_t));
+
+}
+
+int deinitI2C(void)
+{
+
+}
+
 
 void writeI2C(uint32_t device, uint8_t addr, uint8_t *data, uint32_t length) {
 

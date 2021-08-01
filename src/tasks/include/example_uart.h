@@ -26,8 +26,8 @@
 #include <driverlib/sysctl.h>
 #include <driverlib/uart.h>
 
-volatile QueueHandle_t read_uart0_queue;
-volatile QueueHandle_t read_uart1_queue;
+extern volatile QueueHandle_t read_uart0_queue;
+extern volatile QueueHandle_t read_uart1_queue;
 
 bool example_uart_init(void);
 

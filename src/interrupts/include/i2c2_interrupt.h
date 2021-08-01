@@ -29,13 +29,13 @@
 #include <utils/uartstdio.h>
 #endif
 
-volatile uint32_t *i2c2_address;
+extern volatile uint32_t *i2c2_address;
 
-volatile uint8_t **i2c2_buffer;
+extern volatile uint8_t **i2c2_buffer;
 
-volatile uint32_t *i2c2_count;
+extern volatile uint32_t *i2c2_count;
 
-volatile uint16_t *i2c2_int_state;
+extern volatile uint16_t *i2c2_int_state;
 
 void I2C2IntHandler(void);
 
