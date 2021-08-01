@@ -5,6 +5,9 @@ Tivaware libraries on the [TM4C123GXL](http://www.ti.com/tool/ek-tm4c123gxl)
 FreeRTOS version: v8.2.3  
 Tivaware version: 2.1.3.156
 
+## Learning Resources
+This [video series](https://www.youtube.com/playlist?list=PLPW8O6W-1chwyTzI3BHwBLbGQoPFxPAPM) takes you through embedded programming on the TM4C123GH6PM microcontroller, which is what we use. It is strongly recommended you watch these videos. They use the IAR Toolchain and later on a modified version of Eclispse, which isn't what we use here, so it might be difficult to follow along. Nonetheless, the series is an excellent resource to get an understanding of embedded programming.
+
 ## Prerequisites
 To build the project you need the [GNU ARM Embedded Toolchain](https://launchpad.net/gcc-arm-embedded)
 

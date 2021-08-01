@@ -114,6 +114,9 @@ int main() {
     uart1_mutex = xSemaphoreCreateMutex();
     rgb_mutex = xSemaphoreCreateMutex();
 
+  USBDevConnect(USB0_BASE);
+
+  while (1) {};
   // -----------------------------------------------------------------------
   // Allocate FreeRTOS data structures for tasks, these are automatically made in heap
   // -----------------------------------------------------------------------

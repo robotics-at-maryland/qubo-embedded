@@ -5,8 +5,131 @@
 */
 
 #include "include/configure.h"
+
+/* Standard module includes */
+#include <stdbool.h>
+#include <stdint.h>
+
+/* Driver includes */
 #include <inc/tm4c123gh6pm.h>
+#include <inc/hw_memmap.h>
+#include <inc/hw_types.h>
+#include <driverlib/interrupt.h>
+#include <driverlib/gpio.h>
+#include <driverlib/i2c.h>
+#include <driverlib/pin_map.h>
+#include <driverlib/rom.h>
+#include <driverlib/sysctl.h>
+#include <driverlib/uart.h>
 #include <driverlib/pwm.h>
+#include <driverlib/usb.h>
+#include <driverlib/rom_map.h>
+
+
+// Following instructions in Section 18.4 (page 1113) of the TM4C123GH6PM Revision E datasheet (SPMS376E)
+void configureUSB(void) {
+
+  /* STEPS:
+       Enable peripheral clock via RCGCUSB reg
+
+       Clock to appropriate GPIO module via RCGCGPIO reg (SysCtl)
+
+       Configure PMCn fields in GPIOPCTL reg to assign USB signals
+         Consider the following registers:
+           GPIOAFSEL
+           GPIODEN
+           GPIOPDR
+           GPIOPUR
+           GPIOPCTL
+
+           GPIOAMSEL
+
+         Signals to configure:
+           A USB0DM (D-): PD4
+           A USB0DP (D+): PD5
+           A USB0ID     :
+
+               We want to write 0x3 to USBGPCS register to set the internal ID signal to
+               device non OTG mode
+
+           A USB0VBUS   : PB1
+
+               We are operating as self-powered device. We must monitor this signal.
+               In the event the Host disconnects it, we need to disable the D+/D- pullups
+
+               We could attach a GPIO to this and set a falling edge interrupt to configure
+               the pull-up resistors correctly
+
+           D USB0EPEN  (External Power Enable): PB0
+               Self powered device, so we keep this low
+           D USB0PFLT  (USB Power Fault)
+               Not needed, used in Host mode
+
+       Enable USB Controller and USB PHY
+
+       Enable USB PLL to ensure correct clocking is configured for PHY
+         - at least 20 MHz
+         - Main Oscillator Clock Source (either with or w/o PLL, doesn't matter)
+
+       USB0EPEN should be negated on start-up by configuring USB0EPEN and USB0PFLT pins
+       to be controlled by the USB controller
+
+       @note We want to disable power to VBUS to allow the Host to supply power
+
+   */
+
+  /*
+   * Enable peripheral clock via RCGCUSB reg
+   * Peripheral enable configures the RCGC register for the corresponding peripheral
+   */
+  MAP_SysCtlPeripheralEnable(SYSCTL_PERIPH_USB0);
+  while(!MAP_SysCtlPeripheralReady(SYSCTL_PERIPH_USB0))
+  {
+  }
+
+  MAP_SysCtlUSBPLLEnable();
+  MAP_USBClockEnable(USB0_BASE, 4, USB_CLOCK_INTERNAL);
+
+
+  /*
+   * Clock to appropriate GPIO module via RCGCGPIO reg (SysCtl)
+   * Ports B and D are required for device operation
+   */
+  #if 0
+  MAP_SysCtlPeripheralEnable(SYSCTL_PERIPH_GPIOB);
+  while(!MAP_SysCtlPeripheralReady(SYSCTL_PERIPH_GPIOB))
+  {
+  }
+
+  ROM_GPIOPinTypeUSBAnalog(GPIO_PORTB_BASE, GPIO_PIN_1);
+  ROM_GPIOIntTypeSet(GPIO_PORTB_BASE, GPIO_PIN_1, GPIO_k0LEVEL_HIGH);
+  GPIOIntEnable(GPIO_PORTB_BASE, GPIO_PIN_1);
+  ROM_IntEnable(INT_GPIOB);
+  #endif
+
+
+  ROM_SysCtlPeripheralEnable(SYSCTL_PERIPH_GPIOD);
+  while(!ROM_SysCtlPeripheralReady(SYSCTL_PERIPH_GPIOD))
+  {
+  }
+
+  ROM_GPIOPinTypeUSBAnalog(GPIO_PORTD_BASE, GPIO_PIN_4 | GPIO_PIN_5);
+
+  MAP_USBIntStatusControl(USB0_BASE);
+  MAP_USBIntStatusEndpoint(USB0_BASE);
+
+  //
+  // Enable USB Interrupts.
+  //
+  MAP_USBIntEnableControl(USB0_BASE, USB_INTCTRL_RESET |
+                                     USB_INTCTRL_DISCONNECT |
+                                     USB_INTCTRL_RESUME |
+                                     USB_INTCTRL_SUSPEND |
+                                     USB_INTCTRL_SOF);
+  MAP_USBIntEnableEndpoint(USB0_BASE, USB_INTEP_ALL);
+  MAP_IntEnable(INT_USB0);
+}
+
 
 // Need to configure pins PD0, PD1, PE4, PE5, PF0, PF1, PF2, and PF3 for PWM operation
 // NOTE: This goes through the steps on page 1239 of the TM4C123G Datasheet

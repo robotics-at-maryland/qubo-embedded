@@ -31,8 +31,6 @@ ssize_t write_uart_queue(void *uart_queue, void* buffer, size_t size) {
 
     LOCK_UART_QUEUE(queue);
 
-    ROM_UARTIntEnable(queue->hardware_base_address, UART_INT_TX);
-
     // Loop for each byte we need to read.
     ssize_t i;
     for (i = 0; i < size; i++){
@@ -51,7 +49,7 @@ ssize_t write_uart_queue(void *uart_queue, void* buffer, size_t size) {
 }
 
 
-// FIXME: This uses up way too much processor time. Redo this using the uDMA controller
+// FIXME: This is too much work for an ISR
 void empty_rx_buffer(struct UART_Queue *queue) {
 
     BaseType_t higher_priority_task_woken = pdFALSE;
@@ -75,7 +73,7 @@ void empty_rx_buffer(struct UART_Queue *queue) {
     ROM_IntEnable(queue->hardware_interrupt_address);
 }
 
-// FIXME: This uses up way too much processor time. Redo this using the uDMA controller
+// FIXME: This is too much work for an ISR
 void fill_tx_buffer(struct UART_Queue *queue) {
 
     BaseType_t higher_priority_task_woken = pdFALSE;
@@ -93,6 +91,7 @@ void fill_tx_buffer(struct UART_Queue *queue) {
 
     if (xQueueIsQueueEmptyFromISR(queue->write_queue) != pdFALSE) {
 
+        // Queue is empty, no more to transmit for now
         ROM_UARTIntDisable(queue->hardware_base_address, UART_INT_TX);
         #ifdef DEBUG
         //UARTprintf("bedug\n");
@@ -100,6 +99,7 @@ void fill_tx_buffer(struct UART_Queue *queue) {
 
     } else {
 
+        // Queue isn't empty, let us know when there's more space to transmit
         ROM_UARTIntEnable(queue->hardware_base_address, UART_INT_TX);
         #ifdef DEBUG
         //UARTprintf("debug\n");
